@@ -26,7 +26,7 @@ public struct SPAudio {
     
     static func notStopBackgroundMusic() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.ambient, mode: AVAudioSession.Mode.default, options: AVAudioSession.CategoryOptions.defaultToSpeaker)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             

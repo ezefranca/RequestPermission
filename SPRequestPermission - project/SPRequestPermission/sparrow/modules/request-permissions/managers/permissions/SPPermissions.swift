@@ -49,38 +49,22 @@ class SPCameraPermission: SPPermissionInterface {
 class SPNotificationPermission: SPPermissionInterface {
     
     func isAuthorized() -> Bool {
-        let notificationType = UIApplication.shared.currentUserNotificationSettings!.types
-        if notificationType == [] {
-            return false
-        } else {
-            return true
+        var isAuthorized = false
+        UNUserNotificationCenter.current().getNotificationSettings { (settings) in
+            if settings.authorizationStatus == .authorized {
+                 isAuthorized = true
+            }
+            else {
+                 isAuthorized = false
+            }
         }
+        
+        return isAuthorized
     }
     
     func request(withComlectionHandler complectionHandler: @escaping ()->()?) {
-        if #available(iOS 10.0, *) {
-            let center = UNUserNotificationCenter.current()
-            center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
-                DispatchQueue.main.async {
-                    complectionHandler()
-                }
-            }
-        } // iOS 9 support
-        else if #available(iOS 9, *) {
-            UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.badge, .sound, .alert], categories: nil))
-            DispatchQueue.main.async {
-                complectionHandler()
-            }
-        }
-            // iOS 8 support
-        else if #available(iOS 8, *) {
-            UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.badge, .sound, .alert], categories: nil))
-            DispatchQueue.main.async {
-                complectionHandler()
-            }
-        }
-            // iOS 7 support
-        else {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
             DispatchQueue.main.async {
                 complectionHandler()
             }
@@ -112,7 +96,7 @@ class SPPhotoLibraryPermission: SPPermissionInterface {
 class SPMicrophonePermission: SPPermissionInterface {
     
     func isAuthorized() -> Bool {
-        if AVAudioSession.sharedInstance().recordPermission() == .granted {
+        if AVAudioSession.sharedInstance().recordPermission == .granted {
             return true
         }
         return false
@@ -258,7 +242,7 @@ class SPContactsPermission: SPPermissionInterface {
     
     func request(withComlectionHandler complectionHandler: @escaping ()->()?) {
         if #available(iOS 9.0, *) {
-           let store = CNContactStore()
+            let store = CNContactStore()
             store.requestAccess(for: .contacts, completionHandler: { (granted, error) in
                 DispatchQueue.main.async {
                     complectionHandler()
